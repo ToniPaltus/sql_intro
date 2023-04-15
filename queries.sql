@@ -52,6 +52,21 @@ FROM rental
 GROUP BY city, customer.active
 ORDER BY customer.active, count DESC;
 
+--crosstab
+SELECT * 
+FROM crosstab (
+        'SELECT city, customer.active, COUNT(rental.customer_id)
+        FROM rental
+                INNER JOIN customer ON rental.customer_id = customer.customer_id
+                LEFT JOIN address ON customer.address_id = address.address_id
+                INNER JOIN city ON address.city_id = city.city_id
+        GROUP BY city, customer.active
+        ORDER BY customer.active, count DESC',
+        'select distinct(active) from customer'
+        ) as ct (city varchar(50), NoActivity int, Activity int);
+
+
+
 --7. Вывести категорию фильмов, у которой самое большое кол-во часов суммарной аренды в городах (customer.address_id в этом city), и которые начинаются на букву “a”. То же самое сделать для городов в которых есть символ “-”. Написать все в одном запросе.
 SELECT name, hours_total
 FROM (
