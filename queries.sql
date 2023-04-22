@@ -43,6 +43,27 @@ GROUP BY actor.actor_id
 HAVING count(film.film_id) IN (7, 5)               
 ORDER BY cnt desc, actor.actor_id;
 
+--v2
+SELECT fname,
+       lname,
+       cnt,
+       rank
+FROM (
+    SELECT a.actor_id AS id,
+           a.first_name AS fname,
+           a.last_name AS lname,
+           COUNT(*) AS cnt,
+           RANK() OVER (ORDER BY COUNT(*) DESC) AS rank
+    FROM actor AS a
+        INNER JOIN film_actor AS fa ON a.actor_id = fa.actor_id
+        INNER JOIN film AS f ON f.film_id = fa.film_id
+        INNER JOIN film_category AS fc ON f.film_id = fc.film_id
+        INNER JOIN category AS c ON fc.category_id = c.category_id
+WHERE c.name = 'Children'
+GROUP BY a.actor_id
+) subquery
+WHERE rank <= 3;
+
 --6. Вывести города с количеством активных и неактивных клиентов (активный — customer.active = 1). Отсортировать по количеству неактивных клиентов по убыванию.
 SELECT city, customer.active, COUNT(rental.customer_id)
 FROM rental
